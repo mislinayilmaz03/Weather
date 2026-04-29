@@ -201,6 +201,7 @@ class SettingsScreen extends StatelessWidget {
               color: dark ? Colors.white : Colors.black87,
               fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
+          Flexible(child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
           ...WeatherProvider.supportedLanguages.map((lang) {
             final sel = lang['code'] == p.language;
             return Padding(
@@ -240,6 +241,7 @@ class SettingsScreen extends StatelessWidget {
             );
           }),
           const SizedBox(height: 12),
+          ]))),
         ]),
       ),
     );

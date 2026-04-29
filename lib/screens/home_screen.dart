@@ -1,7 +1,10 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import '../models/weather_model.dart';
 import '../providers/weather_provider.dart';
+import '../widgets/shimmer_placeholder.dart';
 
 /// Home Screen — Weather hero, glassmorphism details, outfit section
 /// with inline gender selector and seasonal color palette.
@@ -79,12 +82,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     // ── Humidity & Wind cards ──
                     Row(children: [
-                      Expanded(child: _glassCard(dark, child: _detailTile(
+                      Expanded(child: _premiumGlassCard(dark, child: _detailTile(
                         Icons.water_drop_outlined, p.tr('humidity'),
                         '${w.humidity.toStringAsFixed(0)}%', dark,
                       ))),
                       const SizedBox(width: 12),
-                      Expanded(child: _glassCard(dark, child: _detailTile(
+                      Expanded(child: _premiumGlassCard(dark, child: _detailTile(
                         Icons.air, p.tr('wind'),
                         '${w.windSpeed.toStringAsFixed(0)} km/h', dark,
                       ))),
@@ -92,7 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
 
                     // ── Outfit suggestion card (with gender selector) ──
-                    _glassCard(dark, child: _buildOutfitSection(p, dark)),
+                    _premiumGlassCard(dark, child: _buildOutfitSection(p, dark)),
                     const SizedBox(height: 24),
                   ],
                 ),
@@ -174,6 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
               color: dark ? Colors.white : Colors.black87,
               fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 16),
+          Flexible(child: SingleChildScrollView(child: Column(mainAxisSize: MainAxisSize.min, children: [
           ...WeatherProvider.supportedLanguages.map((lang) {
             final sel = lang['code'] == p.language;
             return ListTile(
@@ -194,6 +198,7 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }),
           const SizedBox(height: 12),
+          ]))),
         ]),
       ),
     );
@@ -400,7 +405,8 @@ class _HomeScreenState extends State<HomeScreen> {
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Flexible(child: Text(w.cityName,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300,
+            style: GoogleFonts.playfairDisplay(
+                fontSize: 32, fontWeight: FontWeight.w400,
                 color: fg, letterSpacing: 0.5),
             maxLines: 2, overflow: TextOverflow.ellipsis,
           )),
@@ -423,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
         // Giant temperature
         Text(
           '${p.displayTemp(w.temperature).toStringAsFixed(0)}°',
-          style: TextStyle(fontSize: 96, fontWeight: FontWeight.w100,
+          style: GoogleFonts.playfairDisplay(fontSize: 96, fontWeight: FontWeight.w200,
               color: fg, height: 1.1),
         ),
         // Condition text
@@ -445,29 +451,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  // GLASS CARD
+  // PREMIUM GLASS CARD — rounded-[2rem] + ghost border
   // ═══════════════════════════════════════════════════════════════════
 
-  Widget _glassCard(bool dark, {required Widget child}) {
+  Widget _premiumGlassCard(bool dark, {required Widget child}) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(32), // rounded-[2rem]
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
         child: Container(
           width: double.infinity,
           decoration: BoxDecoration(
             color: dark
-                ? Colors.white.withOpacity(0.12)
-                : Colors.white.withOpacity(0.7),
-            borderRadius: BorderRadius.circular(16),
+                ? Colors.white.withOpacity(0.10)
+                : Colors.white.withOpacity(0.65),
+            borderRadius: BorderRadius.circular(32),
             border: Border.all(
               color: dark
-                  ? Colors.white.withOpacity(0.2)
-                  : Colors.grey.withOpacity(0.2),
-              width: 0.5,
+                  ? Colors.white.withOpacity(0.1) // ghost border
+                  : Colors.white.withOpacity(0.4),
+              width: 1,
             ),
           ),
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: child,
         ),
       ),
@@ -498,21 +504,33 @@ class _HomeScreenState extends State<HomeScreen> {
   // OUTFIT SECTION — gender selector inline + dynamic image + palette
   // ═══════════════════════════════════════════════════════════════════
 
+  /// Map outfit category to appropriate Material icon.
+  IconData _categoryIcon(OutfitCategory cat) {
+    switch (cat) {
+      case OutfitCategory.top: return Icons.checkroom;
+      case OutfitCategory.bottom: return Icons.straighten;
+      case OutfitCategory.shoes: return Icons.ice_skating;
+      case OutfitCategory.accessory: return Icons.auto_awesome;
+      case OutfitCategory.outerwear: return Icons.shield_outlined;
+      case OutfitCategory.headwear: return Icons.face_retouching_natural;
+    }
+  }
+
   Widget _buildOutfitSection(WeatherProvider p, bool dark) {
     final outfit = p.getOutfitSuggestion();
     final fg = dark ? Colors.white : Colors.black87;
     final fgSub = dark ? Colors.white54 : Colors.black38;
 
     return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      // ── Title row + gender segmented control ──
+      // ── Title row ──
       Row(children: [
         Icon(Icons.checkroom, size: 14, color: fgSub),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
             p.tr('outfit_suggestion').toUpperCase(),
-            style: TextStyle(color: fgSub, fontSize: 12,
-                fontWeight: FontWeight.w600, letterSpacing: 1),
+            style: GoogleFonts.inter(color: fgSub, fontSize: 11,
+                fontWeight: FontWeight.w600, letterSpacing: 1.2),
           ),
         ),
       ]),
@@ -524,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: dark
               ? Colors.white.withOpacity(0.08)
               : Colors.black.withOpacity(0.04),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           _genderPill(p, 'male', Icons.male, dark),
@@ -532,40 +550,60 @@ class _HomeScreenState extends State<HomeScreen> {
         ]),
       ),
 
-      Divider(color: dark ? Colors.white24 : Colors.grey.shade300, height: 24),
+      Divider(color: dark ? Colors.white12 : Colors.grey.shade200, height: 28),
 
-      // ── Dynamic outfit image (Unsplash query-based) ──
+      // ── Dynamic outfit image with Shimmer placeholder ──
       ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(24),
         child: SizedBox(
           width: double.infinity, height: 200,
-          child: Image.network(
+          child: Image.asset(
             outfit.imageUrl,
             fit: BoxFit.cover,
-            loadingBuilder: (context, child, lp) {
-              if (lp == null) return child;
-              return Container(
-                color: dark
-                    ? Colors.white.withOpacity(0.05)
-                    : Colors.grey.shade100,
-                child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2)),
-              );
-            },
-            errorBuilder: (_, __, ___) => Container(
-              color: dark
-                  ? Colors.white.withOpacity(0.05)
-                  : Colors.grey.shade100,
-              child: Icon(Icons.checkroom, size: 48, color: fgSub),
+            errorBuilder: (_, __, ___) => ShimmerPlaceholder(
+              height: 200, borderRadius: 24, isDark: dark,
             ),
           ),
         ),
       ),
-      const SizedBox(height: 14),
+      const SizedBox(height: 16),
+
+      // ── Outfit Item Icons (Kombin Detay Kartları) ──
+      if (outfit.items.isNotEmpty) ...[
+        Wrap(
+          spacing: 8, runSpacing: 8,
+          children: outfit.items.map((item) {
+            return Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: dark
+                    ? Colors.white.withOpacity(0.08)
+                    : Colors.black.withOpacity(0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: dark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.black.withOpacity(0.06),
+                  width: 1,
+                ),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Icon(_categoryIcon(item.category), size: 16,
+                    color: dark ? Colors.white70 : Colors.black54),
+                const SizedBox(width: 6),
+                Text(p.tr(item.nameKey), style: GoogleFonts.inter(
+                  color: fg, fontSize: 12, fontWeight: FontWeight.w500,
+                )),
+              ]),
+            );
+          }).toList(),
+        ),
+        const SizedBox(height: 14),
+      ],
 
       // ── Description text ──
       Text(outfit.description,
-          style: TextStyle(color: fg, fontSize: 15, height: 1.5)),
+          style: GoogleFonts.inter(color: fg, fontSize: 14, height: 1.6)),
       const SizedBox(height: 16),
 
       // ── Seasonal Color Palette ──
@@ -576,7 +614,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Text(
             '${p.tr('seasonal_colors')} — ${p.tr(outfit.seasonName)}'
                 .toUpperCase(),
-            style: TextStyle(color: fgSub, fontSize: 11,
+            style: GoogleFonts.inter(color: fgSub, fontSize: 10,
                 fontWeight: FontWeight.w600, letterSpacing: 1),
           ),
         ),
@@ -590,21 +628,21 @@ class _HomeScreenState extends State<HomeScreen> {
               width: 42, height: 42,
               decoration: BoxDecoration(
                 color: Color(sc.colorValue),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: dark ? Colors.white24 : Colors.grey.shade300,
+                  color: dark ? Colors.white.withOpacity(0.1) : Colors.grey.shade300,
                   width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Color(sc.colorValue).withOpacity(0.3),
-                    blurRadius: 6, offset: const Offset(0, 2),
+                    color: Color(sc.colorValue).withOpacity(0.25),
+                    blurRadius: 8, offset: const Offset(0, 3),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 4),
-            Text(p.tr(sc.name), style: TextStyle(color: fgSub,
+            Text(p.tr(sc.name), style: GoogleFonts.inter(color: fgSub,
                 fontSize: 9, fontWeight: FontWeight.w500)),
           ]);
         }).toList(),
@@ -625,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> {
           color: active
               ? (dark ? const Color(0xFF3B82F6) : const Color(0xFF2563EB))
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 18,
@@ -633,7 +671,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ? Colors.white
                   : (dark ? Colors.white54 : Colors.black45)),
           const SizedBox(width: 4),
-          Text(p.tr(gender), style: TextStyle(
+          Text(p.tr(gender), style: GoogleFonts.inter(
             fontSize: 13, fontWeight: FontWeight.w600,
             color: active
                 ? Colors.white
@@ -643,4 +681,5 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
 }

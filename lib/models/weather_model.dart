@@ -60,6 +60,7 @@ class OutfitSuggestion {
   final String imageQuery; // Unsplash search query for dynamic image
   final List<SeasonalColor> seasonalColors;
   final String seasonName; // translation key for season
+  final List<OutfitItem> items; // individual outfit pieces with icons
 
   OutfitSuggestion({
     required this.description,
@@ -67,8 +68,20 @@ class OutfitSuggestion {
     this.imageQuery = '',
     this.seasonalColors = const [],
     this.seasonName = '',
+    this.items = const [],
   });
 }
+
+/// Represents a single outfit piece with an icon category.
+class OutfitItem {
+  final String nameKey; // translation key
+  final OutfitCategory category;
+
+  const OutfitItem({required this.nameKey, required this.category});
+}
+
+/// Category of an outfit item, used to map to appropriate icons.
+enum OutfitCategory { top, bottom, shoes, accessory, outerwear, headwear }
 
 /// Represents a single color swatch in a seasonal palette.
 class SeasonalColor {
@@ -76,4 +89,35 @@ class SeasonalColor {
   final String name; // translation key
 
   const SeasonalColor({required this.colorValue, required this.name});
+}
+
+/// Weather scenario for the scenario switcher — holds all data for a preset weather state.
+class WeatherScenario {
+  final String key; // unique identifier
+  final String labelKey; // translation key for display
+  final String icon; // emoji
+  final double temp;
+  final String condition;
+  final double humidity;
+  final double windSpeed;
+  final List<int> darkGradient; // 0xAARRGGBB color values
+  final List<int> lightGradient;
+  final List<int> meshColors; // colors for animated mesh gradient
+  final List<OutfitItem> womenOutfit;
+  final List<OutfitItem> menOutfit;
+
+  const WeatherScenario({
+    required this.key,
+    required this.labelKey,
+    required this.icon,
+    required this.temp,
+    required this.condition,
+    required this.humidity,
+    required this.windSpeed,
+    required this.darkGradient,
+    required this.lightGradient,
+    required this.meshColors,
+    required this.womenOutfit,
+    required this.menOutfit,
+  });
 }

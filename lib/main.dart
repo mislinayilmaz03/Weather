@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/weather_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/forecast_screen.dart';
 import 'screens/favourites_screen.dart';
 import 'screens/settings_screen.dart';
+import 'widgets/animated_mesh_gradient.dart';
 
 /// Entry point
 void main() {
@@ -40,7 +42,9 @@ class WeatherApp extends StatelessWidget {
         brightness: dark ? Brightness.dark : Brightness.light,
         scaffoldBackgroundColor: Colors.transparent,
         useMaterial3: true,
-        fontFamily: 'SF Pro Display',
+        textTheme: GoogleFonts.interTextTheme(
+          dark ? ThemeData.dark().textTheme : ThemeData.light().textTheme,
+        ),
       ),
       initialRoute: '/',
       routes: {
@@ -90,15 +94,34 @@ class _MainShellState extends State<MainShell> {
     final activeColor = dark ? Colors.white : const Color(0xFF2563EB);
     final inactiveColor = dark ? Colors.white38 : Colors.grey.shade500;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: gradient,
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
+    final meshColors = provider.meshGradientColors;
+
+    return Stack(
+      children: [
+        // ── Animated Mesh Gradient Background ──
+        Positioned.fill(
+          child: AnimatedMeshGradient(
+            colors: meshColors,
+            duration: const Duration(seconds: 10),
+          ),
         ),
-      ),
-      child: Scaffold(
+        // ── Linear gradient overlay for depth ──
+        Positioned.fill(
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  gradient[0].withOpacity(0.6),
+                  gradient[1].withOpacity(0.3),
+                  gradient[2].withOpacity(0.5),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+          ),
+        ),
+        Scaffold(
         backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: true,
         body: IndexedStack(
@@ -139,6 +162,7 @@ class _MainShellState extends State<MainShell> {
           ),
         ),
       ),
+      ],
     );
   }
 
